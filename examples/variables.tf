@@ -67,9 +67,7 @@ variable "r2_access_secret" {
 variable "cloudflare_account_id" {
   description = "ID da conta Cloudflare"
   type        = string
-  default     = "4839c9636a58fa9490bbe3d2e686ad98"
 }
-
 variable "do_pat" {
   description = "DigitalOcean Personal Access Token"
   type        = string
