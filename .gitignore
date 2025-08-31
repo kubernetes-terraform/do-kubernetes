@@ -38,3 +38,9 @@ override.tf.json
 terraform.rc
 
 # End of https://www.toptal.com/developers/gitignore/api/terraform
+.terraform
+.terraform.lock.hcl
+examples/.terraform.lock.hcl
+examples/kubeconfig
+examples/terraform.tfstate
+examples/terraform.tfstate.backup
