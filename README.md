@@ -1,63 +1,186 @@
-# Terraform Secure Template
+# Terraform DigitalOcean Kubernetes Module
 
-Este repositório é um template para projetos Terraform, com foco em segurança desde o início. Ele integra práticas, ferramentas e automações para garantir a proteção do código, infraestrutura e cadeia de dependências.
+Este módulo Terraform permite criar e gerenciar clusters Kubernetes na DigitalOcean de forma simples e segura, com integração ao Cloudflare R2 para armazenamento remoto de estado.
 
 ## Funcionalidades
 
-- **Pipeline CI/CD seguro** com validações automáticas
-- **Análise de segurança de código e dependências**
-- **Política de permissões mínimas no GitHub Actions**
-- **Pronto para uso em novos projetos Terraform**
+- **Cluster Kubernetes** na DigitalOcean com configuração customizável
+- **Node Pool** com auto-scaling configurável
+- **Kubeconfig** salvo automaticamente para acesso local ao cluster
+- **Backend R2** da Cloudflare para estado remoto
+- **Exemplo completo** de uso incluído
 
-## Workflows e Soluções de Segurança
+## Recursos Criados
 
-### 1. Terraform Format, Validate, and Test
-- **Arquivo:** `.github/workflows/terraform.yml`
-- **Função:** Formata, valida e executa testes em código Terraform a cada push ou pull request.
-- **Segurança:** Utiliza o bloco `permissions` para garantir acesso mínimo (`contents: read`).
+- Cluster Kubernetes na DigitalOcean
+- Node pool com auto-scaling (min: 3, max: 5 nós por padrão)
+- Arquivo kubeconfig local para acesso ao cluster
+- Outputs com informações essenciais do cluster
 
-### 2. Checkov Security Scan
-- **Arquivo:** `.github/workflows/checkov.yml`
-- **Função:** Executa o [Checkov](https://www.checkov.io/) para análise estática de segurança em código IaC (Infrastructure as Code), gerando relatórios SARIF.
-- **Segurança:** Detecta más práticas, configurações inseguras e vulnerabilidades em arquivos Terraform.
+## Como Usar
 
-### 3. Trivy SBOM & Vulnerability Scan
-- **Arquivo:** `.github/workflows/trivy.yml`
-- **Função:** Gera SBOM (Software Bill of Materials) e faz varredura de vulnerabilidades em dependências e imagens, integrando resultados ao GitHub Dependency Graph.
-- **Segurança:** Ajuda a identificar componentes vulneráveis presentes no projeto.
+### 1. Exemplo Básico
 
-### 4. Scorecard Supply-chain Security
-- **Arquivo:** `.github/workflows/scorecard.yml`
-- **Função:** Usa o [OSSF Scorecard](https://github.com/ossf/scorecard) para avaliar práticas de segurança da cadeia de suprimentos do repositório.
-- **Segurança:** Analisa branch protection, dependabot, workflows, tokens, entre outros.
+```hcl
+module "kubernetes_cluster" {
+  source = "github.com/kubernetes-terraform/do-kubernetes"
 
-### 5. OSV-Scanner
-- **Arquivo:** `.github/workflows/osv-scanner.yml`
-- **Função:** Executa o [OSV-Scanner](https://osv.dev/) para identificar vulnerabilidades conhecidas em dependências.
-- **Segurança:** Automatiza a checagem contínua de vulnerabilidades em bibliotecas e módulos.
+  # Configurações do cluster
+  cluster_name = "meu-cluster"
+  region       = "nyc1"
+  k8s_version  = "1.33.1-do.3"
 
-### 6. Dependency Review
-- **Arquivo:** `.github/workflows/dependency-review.yml`
-- **Função:** Bloqueia PRs que introduzem dependências vulneráveis conhecidas, usando o GitHub Dependency Review Action.
-- **Segurança:** Garante que novas dependências estejam livres de vulnerabilidades conhecidas.
+  # Configurações do node pool
+  node_pool_name       = "worker-nodes"
+  node_pool_size       = "s-2vcpu-2gb"
+  node_pool_auto_scale = true
+  node_pool_min_nodes  = 3
+  node_pool_max_nodes  = 5
 
-### 7. CodeQL Analysis (opcional)
-- **Arquivo:** (não incluído por padrão)
-- **Função:** Executa análise estática de segurança aprofundada com CodeQL para identificar vulnerabilidades no código.
-- **Segurança:** Detecta padrões de código problemáticos que podem levar a vulnerabilidades, com base em queries mantidas pela comunidade e pelo GitHub.
-- **Observação:** O uso do CodeQL é recomendado e está documentado em [SECURITY.md](SECURITY.md), mas o workflow não está incluído por padrão neste template. Para habilitar, utilize a opção "Configure CodeQL" na aba "Security" do GitHub ou adicione manualmente o workflow sugerido pela plataforma.
+  # Credenciais DigitalOcean
+  do_pat = var.do_pat
 
-## Outras Práticas de Segurança
+  # Credenciais Cloudflare (para backend R2)
+  cloudflare_api_token  = var.cloudflare_api_token
+  cloudflare_account_id = var.cloudflare_account_id
+  r2_access_key         = var.r2_access_key
+  r2_access_secret      = var.r2_access_secret
 
-- **Dependabot:** Atualizações automáticas de dependências.
-- **Política de Segurança:** Veja [SECURITY.md](SECURITY.md) para detalhes sobre reporte de vulnerabilidades e práticas adotadas.
-- **Code of Conduct:** Ambiente colaborativo e respeitoso ([CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)).
+  # Kubeconfig local
+  write_kubeconfig = true
+}
+```
 
-## Como usar este template
+### 2. Exemplo Completo
 
-1. Clique em `Use this template` no GitHub.
-2. Siga as instruções para criar seu novo repositório.
-3. Adapte os workflows conforme as necessidades do seu projeto.
+Veja o exemplo completo na pasta [`examples/`](examples/) que inclui:
+
+- Configuração completa do módulo
+- Arquivo `terraform.tfvars` de exemplo
+- Documentação detalhada de setup
+- Instruções para obter credenciais
+
+### 3. Configuração Rápida
+
+```bash
+# 1. Clone ou use o módulo
+git clone https://github.com/kubernetes-terraform/do-kubernetes.git
+cd do-kubernetes/examples
+
+# 2. Configure suas credenciais no terraform.tfvars
+cp terraform.tfvars.example terraform.tfvars
+# Edite terraform.tfvars com suas credenciais
+
+# 3. Execute o Terraform
+terraform init
+terraform plan
+terraform apply -var-file=terraform.tfvars
+```
+
+## Variáveis de Entrada
+
+| Nome                    | Descrição                    | Tipo     | Padrão                 | Obrigatória |
+| ----------------------- | ---------------------------- | -------- | ---------------------- | ----------- |
+| `cluster_name`          | Nome do cluster Kubernetes   | `string` | `"techpreta"`          | Não         |
+| `region`                | Região da DigitalOcean       | `string` | `"nyc1"`               | Não         |
+| `k8s_version`           | Versão do Kubernetes         | `string` | `"1.33.1-do.3"`        | Não         |
+| `node_pool_name`        | Nome do node pool            | `string` | `"techpreta-nodepool"` | Não         |
+| `node_pool_size`        | Tamanho dos nós              | `string` | `"s-2vcpu-2gb"`        | Não         |
+| `node_pool_auto_scale`  | Habilitar auto-scaling       | `bool`   | `true`                 | Não         |
+| `node_pool_min_nodes`   | Número mínimo de nós         | `number` | `3`                    | Não         |
+| `node_pool_max_nodes`   | Número máximo de nós         | `number` | `5`                    | Não         |
+| `write_kubeconfig`      | Salvar kubeconfig localmente | `bool`   | `true`                 | Não         |
+| `do_pat`                | Token de acesso DigitalOcean | `string` | -                      | **Sim**     |
+| `cloudflare_api_token`  | Token da API Cloudflare      | `string` | -                      | **Sim**     |
+| `cloudflare_account_id` | ID da conta Cloudflare       | `string` | -                      | **Sim**     |
+| `r2_access_key`         | Chave de acesso R2           | `string` | -                      | **Sim**     |
+| `r2_access_secret`      | Segredo de acesso R2         | `string` | -                      | **Sim**     |
+
+## Outputs
+
+| Nome               | Descrição                     |
+| ------------------ | ----------------------------- |
+| `cluster_id`       | ID do cluster Kubernetes      |
+| `cluster_name`     | Nome do cluster               |
+| `cluster_endpoint` | Endpoint do cluster           |
+| `cluster_status`   | Status do cluster             |
+| `cluster_version`  | Versão do Kubernetes          |
+| `node_pool_id`     | ID do node pool               |
+| `kubeconfig_path`  | Caminho do arquivo kubeconfig |
+
+## Credenciais Necessárias
+
+### DigitalOcean
+- **Personal Access Token**: Obtenha em [DigitalOcean > API](https://cloud.digitalocean.com/account/api/tokens)
+- **Permissões**: Write (para criar recursos)
+
+### Cloudflare R2
+- **API Token**: Obtenha em [Cloudflare > My Profile > API Tokens](https://dash.cloudflare.com/profile/api-tokens)
+- **R2 Access Key/Secret**: Obtenha em [Cloudflare > R2 > Manage R2 API tokens](https://dash.cloudflare.com/)
+
+Consulte a [documentação completa](examples/docs/README.md) para instruções detalhadas.
+
+## Verificação Pós-Deploy
+
+Após a aplicação bem-sucedida:
+
+```bash
+# Use o kubeconfig gerado
+export KUBECONFIG=./kubeconfig
+
+# Verifique os nós do cluster
+kubectl get nodes
+
+# Verifique pods do sistema
+kubectl get pods -A
+
+# Informações do cluster
+kubectl cluster-info
+```
+
+## Limpeza de Recursos
+
+Para destruir todos os recursos criados:
+
+```bash
+terraform destroy
+```
+
+**⚠️ Atenção:** Isso removerá permanentemente o cluster e todos os recursos associados.
+
+## Estrutura do Projeto
+
+```
+.
+├── examples/                    # Exemplo de uso completo
+│   ├── docs/                   # Documentação detalhada
+│   ├── main.tf                 # Consumo do módulo
+│   ├── variables.tf            # Variáveis do exemplo
+│   ├── outputs.tf              # Outputs do exemplo
+│   ├── versions.tf             # Providers e backend
+│   └── terraform.tfvars.example # Exemplo de configuração
+├── main.tf                     # Recursos principais do módulo
+├── variables.tf                # Declaração de variáveis
+├── outputs.tf                  # Outputs do módulo
+├── versions.tf                 # Providers requeridos
+├── kubeconfig.tf              # Configuração do kubeconfig
+└── README.md                   # Esta documentação
+```
+
+## Segurança e Boas Práticas
+
+- **Estado Remoto**: Utiliza Cloudflare R2 para armazenamento seguro do estado
+- **Credenciais**: Nunca hardcode credenciais; use `terraform.tfvars` ou variáveis de ambiente
+- **Kubeconfig**: Arquivo sensível, incluído no `.gitignore`
+- **Análise de Segurança**: Workflows de CI/CD incluem scans de segurança automatizados
+
+## Contribuição
+
+Contribuições são bem-vindas! Veja nosso [guia de contribuição](CONTRIBUTING.md).
+
+## Licença
+
+Este projeto está licenciado sob a [Licença MIT](LICENSE).
 
 ## Contato
 

@@ -1,0 +1,27 @@
+# Exemplo de arquivo terraform.tfvars
+# Copie este arquivo para terraform.tfvars e preencha com seus valores reais
+# IMPORTANTE: Nunca commite o arquivo terraform.tfvars com dados reais!
+
+# DigitalOcean Configuration
+do_pat = "dop_v1_your_digitalocean_token_here"
+
+# Cloudflare Configuration
+cloudflare_api_token  = "your_cloudflare_api_token_here"
+cloudflare_account_id = "your_cloudflare_account_id_here"
+r2_access_key         = "your_r2_access_key_here"
+r2_access_secret      = "your_r2_access_secret_here"
+
+# Cluster Configuration (optional - defaults will be used if not specified)
+cluster_name = "my-k8s-cluster"
+region       = "nyc1"
+k8s_version  = "1.33.1-do.3"
+
+# Node Pool Configuration (optional)
+node_pool_name       = "worker-nodes"
+node_pool_size       = "s-2vcpu-2gb"
+node_pool_auto_scale = true
+node_pool_min_nodes  = 3
+node_pool_max_nodes  = 5
+
+# Kubeconfig (optional)
+write_kubeconfig = true
