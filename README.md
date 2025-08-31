@@ -1,18 +1,45 @@
-# Terraform Secure Template
+# Kubernetes DigitalOcean - Terraform Template
 
-Este repositório é um template para projetos Terraform, com foco em segurança desde o início. Ele integra práticas, ferramentas e automações para garantir a proteção do código, infraestrutura e cadeia de dependências.
+Este repositório fornece configurações Terraform seguras e bem documentadas para clusters Kubernetes na DigitalOcean, com foco especial em configurações de upgrade (`auto_upgrade` e `surge_upgrade`).
 
 ## Funcionalidades
 
 - **Pipeline CI/CD seguro** com validações automáticas
 - **Análise de segurança de código e dependências**
 - **Política de permissões mínimas no GitHub Actions**
-- **Pronto para uso em novos projetos Terraform**
+- **Configurações de upgrade otimizadas** para diferentes ambientes
+- **Documentação abrangente** sobre upgrades do Kubernetes
+- **Exemplos práticos** para desenvolvimento, staging e produção
+
+## Documentação de Upgrades Kubernetes
+
+### 📚 Guias Principais
+- [**Configurações de Upgrade do Kubernetes**](docs/kubernetes-upgrades.md) - Documentação completa sobre `auto_upgrade` e `surge_upgrade`
+- [**Guia de Configuração**](docs/configuration-guide.md) - Como configurar variáveis Terraform para diferentes cenários
+- [**FAQ**](docs/faq.md) - Perguntas frequentes e soluções de problemas
+
+### 💡 Exemplos Práticos
+- [**Desenvolvimento**](docs/examples/development.md) - Configuração otimizada para economia e agilidade
+- [**Staging**](docs/examples/staging.md) - Ambiente intermediário para testes
+- [**Produção**](docs/examples/production.md) - Configuração robusta para ambientes críticos
+
+### 🎯 Configurações Principais
+
+#### `auto_upgrade`
+Habilita atualizações automáticas do control plane do cluster Kubernetes.
+- ✅ **Desenvolvimento**: Sempre habilitado para ter versões atualizadas
+- ✅ **Staging**: Habilitado para testar antes da produção  
+- ⚠️ **Produção**: Controlado manualmente para máxima estabilidade
+
+#### `surge_upgrade`
+Permite atualizações de nodes com zero downtime através de nodes temporários.
+- ❌ **Desenvolvimento**: Desabilitado para economia de custos
+- ✅ **Staging**: Habilitado para simular produção
+- ✅ **Produção**: Sempre habilitado para zero downtime crítico
+
 
 ## Workflows e Soluções de Segurança
-
 ### 1. Terraform Format, Validate, and Test
-- **Arquivo:** `.github/workflows/terraform.yml`
 - **Função:** Formata, valida e executa testes em código Terraform a cada push ou pull request.
 - **Segurança:** Utiliza o bloco `permissions` para garantir acesso mínimo (`contents: read`).
 
@@ -55,9 +82,19 @@ Este repositório é um template para projetos Terraform, com foco em segurança
 
 ## Como usar este template
 
+### 🚀 Início Rápido
+
+1. **Consulte a documentação**: Comece lendo a [documentação completa](docs/README.md)
+2. **Escolha sua configuração**: Use os exemplos para [desenvolvimento](docs/examples/development.md), [staging](docs/examples/staging.md) ou [produção](docs/examples/production.md)
+3. **Configure as variáveis**: Siga o [guia de configuração](docs/configuration-guide.md)
+4. **Deploy com segurança**: Aplique as configurações em seu ambiente
+
+### 📋 Template Usage
+
 1. Clique em `Use this template` no GitHub.
 2. Siga as instruções para criar seu novo repositório.
 3. Adapte os workflows conforme as necessidades do seu projeto.
+4. Configure as variáveis de upgrade conforme sua estratégia.
 
 ## Contato
 
